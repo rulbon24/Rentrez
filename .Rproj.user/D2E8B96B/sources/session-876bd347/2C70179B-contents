@@ -1,0 +1,29 @@
+---
+title: "Analysis"
+author: "Bonnie Rule"
+date: "2025-02-26"
+output: html_document
+---
+
+**Group Members:** Bonnie Rule (20295738), Mackenzie Calhoun (20265644)
+
+Github link: <https://github.com/rulbon24/Rentrez>
+
+# Part I
+
+```{r}
+library(rentrez)
+```
+
+```{r}
+data <- read.csv("Sequences.csv")
+```
+
+```{r}
+gc_content <- function(seq) {
+  (sum(str_count(seq, "G")) + sum(str_count(seq, "C"))) / nchar(seq) * 100
+}
+Sequences$GC_Content <- sapply(Sequences$Sequence, gc_content)
+```
+
+This is the bacteria that causes Lyme disease: ![Borrelia burgdorferi](https://upload.wikimedia.org/wikipedia/commons/6/69/Borrelia_burgdorferi_%28CDC-PHIL_-6631%29.tif) [Learn more about Borrelia burgdorferi](https://en.wikipedia.org/wiki/Borrelia_burgdorferi)
