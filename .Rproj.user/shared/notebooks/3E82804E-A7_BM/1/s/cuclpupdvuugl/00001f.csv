@@ -1,0 +1,4 @@
+"0","alignment <- entrez_fetch(db=""nucleotide"", id=blast_result$ids, rettype=""fasta"")
+"
+"2","Error: Vector of IDs to send to NCBI is empty, perhaps entrez_search or entrez_link found no hits?
+"

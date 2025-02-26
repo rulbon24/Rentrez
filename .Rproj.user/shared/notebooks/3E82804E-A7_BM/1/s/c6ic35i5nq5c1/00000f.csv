@@ -1,0 +1,4 @@
+"0","nucleotide_counts <- matrix(0, nrow = nrow(Data), ncol = 4)
+"
+"2","Error in nrow(Data) : object 'Data' not found
+"
