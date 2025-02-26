@@ -1,0 +1,116 @@
+---
+title: "Analysis"
+author: "Bonnie Rule"
+date: "2025-02-26"
+output: html_document
+---
+
+**Group Members:** Bonnie Rule (20295738), Mackenzie Calhoun (20265644)
+
+Github link: <https://github.com/rulbon24/Rentrez>
+
+# Part I
+
+```{r}
+library(rentrez)
+```
+
+```{r}
+data <- read.csv("Sequences.csv")
+```
+
+Custom function to count the number of each base pair:
+```{r}
+count_nucleotides <- function(seq) {
+ seq <- gsub("[^ATCG]", "", seq)
+
+ A_count <- nchar(gsub("[^A]", "", seq))
+ T_count <- nchar(gsub("[^T]", "", seq))
+ C_count <- nchar(gsub("[^C]", "", seq))
+ G_count <- nchar(gsub("[^G]", "", seq))
+
+ return(c(A = A_count, T = T_count, C = C_count, G = G_count))}
+```
+
+Creating an empty matrix to store nucleotide counts:
+```{r}
+nucleotide_counts <- matrix(0, nrow = nrow(data), ncol = 4)
+colnames(nucleotide_counts) <- c("A", "T", "C", "G")
+```
+
+Using a loop to apply counts to each sequence and converting it to a dataframe:
+```{r}
+for (i in 1:nrow(data)) {
+ nucleotide_counts[i, ] <- count_nucleotides(data$Sequence[i])}
+CountsDF <- data.frame(nucleotide_counts)
+```
+
+Printing each sequence:
+```{r}
+for (i in 1:nrow(data)) {
+ print(paste("Sequence ID:", data$Name[i]))
+ print(data$Sequence[i])}
+```
+```{r}
+print(CountsDF)
+```
+
+Calculating GC content as percentages:
+```{r}
+calculate_gc_content <- function(seq) {
+ seq <- gsub("[^ATCG]", "", seq)
+
+ G_count <- nchar(gsub("[^G]", "", seq))
+ C_count <- nchar(gsub("[^C]", "", seq))
+
+ total_length <- nchar(seq)
+
+ gc_content <- (G_count + C_count) / total_length * 100
+
+ return(gc_content)}
+```
+
+Creating the GC content table:
+```{r}
+data$ID <- gsub("^>(.*?)(\\s|$).*", "\\1", data$Name)
+data$GC_Content <- sapply(data$Sequence, calculate_gc_content)
+gc_content_table <- data.frame(
+ Sequence_ID = data$ID,
+ GC_Content = paste(round(data$GC_Content, 2), "%", sep = ""))
+print(gc_content_table)
+```
+
+This is the bacteria that causes Lyme disease: ![Borrelia burgdorferi](https://upload.wikimedia.org/wikipedia/commons/6/69/Borrelia_burgdorferi_%28CDC-PHIL_-6631%29.tif) 
+[Learn more about Borrelia burgdorferi](https://en.wikipedia.org/wiki/Borrelia_burgdorferi)
+
+# Part II
+
+```{r}
+library(Biostrings)
+library(annotate)
+```
+
+Performing blast to identify matching sequences:
+```{r}
+unknown_seq <- "GCCTGATGGAGGGGGATAACTACTGGAAACGGTAGCTAATACCGCATGACCTCGCAAGAGCAAAGTGGGGGACCTTAGGGCCTCACGCCATCGGATGAACCCAGATGGGATTAGCTAGTAGGTGGGGTAATGGCTCACCTAGGCGACGATCCCTAGCTGGTCTGAGAGGATGACCAGCCACACTGGAACTGAGACACGGTCCAGACTCCTACGGGAGGCAGCAGTGGGGAATATTGCACAATGGGCGCAA"
+blast_results <- blastSequences(unknown_seq, as='data.frame',
+ timeout=240,
+hitListSize=5) 
+```
+
+Exclude the duplicates:
+```{r}
+new <- data.frame(blast_results[!duplicated(blast_results$Hit_accession), ])
+```
+
+BLAST results:
+```{r}
+relevant_columns <- new[,c(10, 11, 14, 15)]
+print(relevant_columns)
+```
+
+```{r}
+print(new$Hit_def)
+```
+
+We can now confirm that the sequence is not human DNA, it is from *Yersinia pestis*. The results showed a 99.5% identity to *Yersinia pestis*, the bacterium responsible for plague. The alignment confirmed the presence of this pathogen in the sample, which is a serious concern due to the bacterium's potential to cause life-threatening infections. Plague, transmitted through fleas or respiratory droplets, can result in symptoms such as fever, chills, and swollen lymph nodes. Immediate medical attention is required, and empirical treatment with antibiotics such as streptomycin or gentamicin should be considered. Given the bacterium's transmissibility, public health measures like quarantine may be necessary. This discovery suggests a potential medical emergency, and urgent intervention by the clinician is advised to confirm the diagnosis and begin treatment.
